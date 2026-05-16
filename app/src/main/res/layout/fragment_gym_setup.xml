@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- Map fills the screen behind the bottom sheet — hidden when 3 gyms are saved -->
+
+    <fragment
+        android:id="@+id/mapFragmentGym"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="662dp" />
+
+    <!-- Bottom sheet sits on top of the map — must be a direct child of CoordinatorLayout -->
+    <LinearLayout
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="800dp"
+        android:layout_gravity="bottom"
+        android:background="@color/surface"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:behavior_peekHeight="-800dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <!-- Drag handle -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="#555555" />
+
+        <!-- Add gym controls — hidden when 3 gyms saved -->
+        <LinearLayout
+            android:id="@+id/addGymControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="Gym name (optional)"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etGymName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:imeOptions="actionNext"
+                    android:maxLines="1"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#888888" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchViewGym"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/background"
+                app:queryHint="@string/search_gym_location"
+                app:searchIcon="@android:drawable/ic_menu_search" />
+
+            <TextView
+                android:id="@+id/tvRadiusLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Radius: 100m"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <SeekBar
+                android:id="@+id/seekBarRadius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:max="450"
+                android:progress="50"
+                android:progressTint="@color/gym_green"
+                android:thumbTint="@color/gym_green" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveGym"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/save_gym_location"
+                app:backgroundTint="@color/gym_green"
+                app:cornerRadius="8dp" />
+
+            <FrameLayout
+                android:id="@+id/mapContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <!-- Shown when 3 gyms are saved -->
+        <TextView
+            android:id="@+id/tvGymLimit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:padding="12dp"
+            android:text="Maximum of 3 gym locations saved.\nDelete one to add another."
+            android:textColor="#AAAAAA"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/saved_gyms"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSavedGyms"
+            android:layout_width="match_parent"
+            android:layout_height="414dp"
+            android:nestedScrollingEnabled="true" />
+
+    </LinearLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

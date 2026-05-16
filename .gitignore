@@ -1,0 +1,51 @@
+# ─── Local secrets — NEVER commit ──────────────────────────────────────────────
+local.properties
+
+# ─── Android build outputs ─────────────────────────────────────────────────────
+*.apk
+*.aab
+*.ap_
+*.dex
+/app/build/
+/build/
+out/
+
+# ─── Gradle ────────────────────────────────────────────────────────────────────
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+.gradletasknamecache
+
+# ─── Android Studio / IntelliJ IDEA ────────────────────────────────────────────
+*.iml
+.idea/
+*.ipr
+*.iws
+Thumbs.db
+
+# ─── Generated files ───────────────────────────────────────────────────────────
+gen/
+generated/
+captures/
+
+# ─── Keystore (signing keys — store securely outside VCS) ──────────────────────
+*.jks
+*.keystore
+
+# ─── ProGuard / R8 mapping ─────────────────────────────────────────────────────
+mapping.txt
+
+# ─── Test results ──────────────────────────────────────────────────────────────
+test-results/
+lint-results*
+
+# ─── NDK / CMake ───────────────────────────────────────────────────────────────
+.cxx/
+*.so
+obj/
+
+# ─── OS files ──────────────────────────────────────────────────────────────────
+.DS_Store
+*.swp
+*~

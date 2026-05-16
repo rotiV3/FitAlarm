@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.rotiv3.fitalarm.ui.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_eventDetailFragment"
+            app:destination="@id/eventDetailFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/calendarFragment"
+        android:name="com.rotiv3.fitalarm.ui.calendar.CalendarFragment"
+        android:label="Calendar"
+        tools:layout="@layout/fragment_calendar">
+        <action
+            android:id="@+id/action_calendarFragment_to_eventDetailFragment"
+            app:destination="@id/eventDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gymSetupFragment"
+        android:name="com.rotiv3.fitalarm.ui.gym.GymSetupFragment"
+        android:label="Gym"
+        tools:layout="@layout/fragment_gym_setup" />
+
+    <fragment
+        android:id="@+id/achievementFragment"
+        android:name="com.rotiv3.fitalarm.ui.achievement.AchievementFragment"
+        android:label="Achievements"
+        tools:layout="@layout/fragment_achievement" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.rotiv3.fitalarm.ui.settings.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/eventDetailFragment"
+        android:name="com.rotiv3.fitalarm.ui.eventdetail.EventDetailFragment"
+        android:label="Event Detail"
+        tools:layout="@layout/fragment_event_detail" />
+
+</navigation>

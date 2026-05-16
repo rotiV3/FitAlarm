@@ -1,0 +1,21 @@
+## Copy this file to local.properties and fill in your values.
+## local.properties is gitignored — never commit it.
+
+# Path to your Android SDK installation
+# Android Studio sets this automatically when you open the project.
+# macOS default:
+sdk.dir=/Users/YOUR_USERNAME/Library/Android/sdk
+# Linux default:
+# sdk.dir=/home/YOUR_USERNAME/Android/Sdk
+# Windows default:
+# sdk.dir=C\:\\Users\\YOUR_USERNAME\\AppData\\Local\\Android\\Sdk
+
+# Google Maps API Key
+# Get from: Google Cloud Console → APIs & Services → Credentials → Create API Key
+# Restrict it to: Maps SDK for Android + your package name (com.rotiv3.fitalarm)
+MAPS_API_KEY=YOUR_MAPS_API_KEY_HERE
+
+# OAuth2 Web Client ID
+# Get from: Google Cloud Console → APIs & Services → Credentials
+# → Create OAuth client ID → Web application
+WEB_CLIENT_ID=YOUR_WEB_CLIENT_ID_HERE.apps.googleusercontent.com

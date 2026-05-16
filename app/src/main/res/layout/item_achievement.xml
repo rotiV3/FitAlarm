@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="6dp"
+    app:cardBackgroundColor="@color/surface"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="3dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Trophy emoji — large, anchored top-start -->
+        <TextView
+            android:id="@+id/tvTrophyEmoji"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:textSize="28sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Streak badge — top-end corner -->
+        <TextView
+            android:id="@+id/tvStreakBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#1AFF9800"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textColor="@color/alarm_orange"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Achievement title — right of emoji, left of streak badge -->
+        <TextView
+            android:id="@+id/tvAchievementTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="4dp"
+            android:textColor="@color/achievement_gold"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/tvStreakBadge"
+            app:layout_constraintStart_toEndOf="@id/tvTrophyEmoji"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Description — below title, right of emoji -->
+        <TextView
+            android:id="@+id/tvAchievementDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvTrophyEmoji"
+            app:layout_constraintTop_toBottomOf="@id/tvAchievementTitle" />
+
+        <!-- Context text — bottom-left, below description -->
+        <TextView
+            android:id="@+id/tvGymEvent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="6dp"
+            android:textColor="#888888"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tvAchievementDate"
+            app:layout_constraintStart_toEndOf="@id/tvTrophyEmoji"
+            app:layout_constraintTop_toBottomOf="@id/tvAchievementDescription" />
+
+        <!-- Date — bottom-end, baseline-aligned with context text -->
+        <TextView
+            android:id="@+id/tvAchievementDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#555555"
+            android:textSize="11sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvGymEvent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

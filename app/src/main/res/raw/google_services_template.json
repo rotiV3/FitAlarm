@@ -1,0 +1,57 @@
+{
+  "_comment": "This is a TEMPLATE. Replace all TODO values with your actual credentials.",
+  "_instructions": [
+    "1. Create a project at https://console.cloud.google.com/",
+    "2. Enable the Google Calendar API and Maps SDK for Android",
+    "3. Create OAuth2 credentials (type: Android application)",
+    "4. Download the actual google-services.json from Firebase console or Google Cloud console",
+    "5. Place the real google-services.json in your app/ directory",
+    "6. Get Maps API key and add to local.properties: MAPS_API_KEY=your_key_here",
+    "7. Add WEB_CLIENT_ID=your_web_client_id to local.properties"
+  ],
+  "project_info": {
+    "project_number": "TODO_PROJECT_NUMBER",
+    "project_id": "TODO_PROJECT_ID",
+    "storage_bucket": "TODO_PROJECT_ID.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:TODO_PROJECT_NUMBER:android:TODO_APP_ID",
+        "android_client_info": {
+          "package_name": "com.rotiv3.fitalarm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "TODO_YOUR_ANDROID_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rotiv3.fitalarm",
+            "certificate_hash": "TODO_YOUR_SHA1_FINGERPRINT"
+          }
+        },
+        {
+          "client_id": "TODO_YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "TODO_YOUR_ANDROID_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "TODO_YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
