@@ -1,6 +1,5 @@
 package com.rotiv3.fitalarm
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -8,13 +7,16 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.rotiv3.fitalarm.alarm.CalendarSyncService
+import com.rotiv3.fitalarm.billing.SubscriptionManager
 import com.rotiv3.fitalarm.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject lateinit var subscriptionManager: SubscriptionManager
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
@@ -24,18 +26,17 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Check if user is signed in
-        val account = GoogleSignIn.getLastSignedInAccount(this)
-        if (account == null) {
-            startActivity(Intent(this, OnboardingActivity::class.java))
-            finish()
-            return
-        }
+        // Connect billing client and verify existing subscriptions
+        subscriptionManager.connect()
 
         setupNavigation()
 
         // Schedule activity alarms for today + tomorrow whenever the app opens
-        startForegroundService(Intent(this, CalendarSyncService::class.java))
+        try {
+            startForegroundService(android.content.Intent(this, CalendarSyncService::class.java))
+        } catch (e: Exception) {
+            // Safe to ignore on some devices
+        }
     }
 
     private fun setupNavigation() {
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        val appBarConfiguration = AppBarConfiguration(
+        AppBarConfiguration(
             setOf(
                 R.id.homeFragment,
                 R.id.calendarFragment,
@@ -54,10 +55,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigationView.setupWithNavController(navController)
 
-        // Hide bottom nav on settings and event detail screens
+        // Hide bottom nav on detail/create screens
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.settingsFragment, R.id.eventDetailFragment -> {
+                R.id.settingsFragment,
+                R.id.eventDetailFragment,
+                R.id.createEventFragment -> {
                     binding.bottomNavigationView.visibility = View.GONE
                 }
                 else -> {

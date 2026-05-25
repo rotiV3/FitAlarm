@@ -17,6 +17,9 @@
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_createEventFragment"
+            app:destination="@id/createEventFragment" />
     </fragment>
 
     <fragment
@@ -52,5 +55,16 @@
         android:name="com.rotiv3.fitalarm.ui.eventdetail.EventDetailFragment"
         android:label="Event Detail"
         tools:layout="@layout/fragment_event_detail" />
+
+    <fragment
+        android:id="@+id/createEventFragment"
+        android:name="com.rotiv3.fitalarm.ui.createevent.CreateEventFragment"
+        android:label="Plan Activity"
+        tools:layout="@layout/fragment_create_event" />
+
+    <dialog
+        android:id="@+id/paywallFragment"
+        android:name="com.rotiv3.fitalarm.ui.paywall.PaywallFragment"
+        android:label="Upgrade to Pro" />
 
 </navigation>

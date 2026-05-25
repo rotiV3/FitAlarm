@@ -2,6 +2,7 @@ package com.rotiv3.fitalarm.ui.gym
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rotiv3.fitalarm.billing.SubscriptionManager
 import com.rotiv3.fitalarm.data.model.GymLocation
 import com.rotiv3.fitalarm.data.repository.GymRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GymViewModel @Inject constructor(
-    private val gymRepository: GymRepository
+    private val gymRepository: GymRepository,
+    val subscriptionManager: SubscriptionManager
 ) : ViewModel() {
 
     val gymLocations: StateFlow<List<GymLocation>> = gymRepository.getAllGymLocations()
@@ -22,6 +24,10 @@ class GymViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    /** Free users may only have 1 gym; Pro users are unlimited (practical cap: 10). */
+    fun canAddGym(currentCount: Int): Boolean =
+        if (subscriptionManager.isPro) currentCount < 10 else currentCount < 1
 
     fun addGymLocation(
         name: String,

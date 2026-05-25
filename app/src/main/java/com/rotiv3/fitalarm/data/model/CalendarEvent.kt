@@ -10,7 +10,9 @@ data class CalendarEvent(
     val activityType: ActivityType = ActivityType.NONE,
     val trainingPlan: String?,
     val colorId: String?,
-    val sessionStatus: SessionStatus = SessionStatus.UPCOMING
+    val sessionStatus: SessionStatus = SessionStatus.UPCOMING,
+    /** True for events created inside the app (not imported from Google/Apple Calendar). */
+    val isLocalEvent: Boolean = false
 ) {
     val isGymEvent: Boolean get() = activityType != ActivityType.NONE
 

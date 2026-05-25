@@ -5,8 +5,9 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
+import com.rotiv3.fitalarm.data.local.AppEventDao
+import com.rotiv3.fitalarm.data.model.CalendarEvent
 import com.rotiv3.fitalarm.data.model.SessionStatus
-import com.rotiv3.fitalarm.data.repository.AlarmRepository
 import com.rotiv3.fitalarm.data.repository.CalendarRepository
 import com.rotiv3.fitalarm.data.repository.GymRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
@@ -24,8 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val calendarRepository: CalendarRepository,
-    private val alarmRepository: AlarmRepository,
-    private val gymRepository: GymRepository
+    private val gymRepository: GymRepository,
+    private val appEventDao: AppEventDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -35,51 +37,67 @@ class HomeViewModel @Inject constructor(
     val authEvent: SharedFlow<Intent> = _authEvent.asSharedFlow()
 
     private var showOnlyWorkouts = false
-    private var lastAccount: Account? = null
-    private var lastUserName: String = ""
 
     fun setShowOnlyWorkouts(enabled: Boolean) {
         showOnlyWorkouts = enabled
-        lastAccount?.let { loadTodayData(it, lastUserName) }
+        // Re-apply filter on current state without a network call
+        val current = _uiState.value as? HomeUiState.Success ?: return
+        val filtered = if (enabled) current.events.filter { it.isGymEvent } else current.events
+        _uiState.value = current.copy(events = filtered)
     }
 
-    fun loadTodayData(account: Account, userName: String, leadTimeMinutes: Int = 30) {
-        lastAccount = account
-        lastUserName = userName
+    /**
+     * Load today's activities.
+     * - [account] may be null for guests — local AppEvents are always shown.
+     * - Google Calendar events are merged on top when signed in.
+     */
+    fun loadTodayData(account: Account?, userName: String) {
         _uiState.value = HomeUiState.Loading
 
         viewModelScope.launch {
             try {
                 val today = LocalDate.now(ZoneId.systemDefault())
-                val rawEvents = calendarRepository.getEventsForDay(account, today)
-                val allEvents = attachSessionStatus(rawEvents)
-                val events = if (showOnlyWorkouts) allEvents.filter { it.isGymEvent } else allEvents
-                val gymEvents = allEvents.filter { it.isGymEvent }
-                val nextAlarm = alarmRepository.getNextAlarm()
+                val zone = ZoneId.systemDefault()
+                val dayStart = today.atStartOfDay(zone).toEpochSecond() * 1000L
+                val dayEnd = today.plusDays(1).atStartOfDay(zone).toEpochSecond() * 1000L
 
-                val firstEventStart = allEvents.minByOrNull { it.startTime }?.startTime
-                val suggestedWakeup = firstEventStart?.let { it - (leadTimeMinutes * 60_000L) }
-                    ?.takeIf { it > System.currentTimeMillis() }
+                // Always load local app events
+                val localEvents: List<CalendarEvent> = appEventDao
+                    .getEventsForDay(dayStart, dayEnd)
+                    .first()
+                    .map { it.toCalendarEvent() }
+
+                // Optionally merge Google Calendar events
+                val remoteEvents: List<CalendarEvent> = if (account != null) {
+                    try {
+                        calendarRepository.getEventsForDay(account, today)
+                    } catch (e: UserRecoverableAuthIOException) {
+                        _authEvent.tryEmit(e.intent)
+                        emptyList()
+                    }
+                } else emptyList()
+
+                val merged = (localEvents + remoteEvents)
+                    .sortedBy { it.startTime }
+                val withStatus = attachSessionStatus(merged)
+                val allEvents = if (showOnlyWorkouts) withStatus.filter { it.isGymEvent } else withStatus
+                val gymEvents = withStatus.filter { it.isGymEvent }
 
                 _uiState.value = HomeUiState.Success(
-                    events = events,
+                    events = allEvents,
                     gymEvents = gymEvents,
-                    nextAlarm = nextAlarm,
                     userName = userName,
-                    suggestedWakeupTime = suggestedWakeup
+                    isSignedIn = account != null
                 )
-            } catch (e: UserRecoverableAuthIOException) {
-                _authEvent.tryEmit(e.intent)
-                _uiState.value = HomeUiState.Error("Calendar permission needed. Tap sync after granting access.")
             } catch (e: Exception) {
-                _uiState.value = HomeUiState.Error("Failed to load events: ${e.message}")
+                _uiState.value = HomeUiState.Error("Failed to load activities: ${e.message}")
             }
         }
     }
 
     private suspend fun attachSessionStatus(
-        events: List<com.rotiv3.fitalarm.data.model.CalendarEvent>
-    ): List<com.rotiv3.fitalarm.data.model.CalendarEvent> {
+        events: List<CalendarEvent>
+    ): List<CalendarEvent> {
         if (events.isEmpty()) return events
         val now = System.currentTimeMillis()
         val dayStart = events.minOf { it.startTime }
@@ -90,25 +108,11 @@ class HomeViewModel @Inject constructor(
             val db = sessions[event.id]
             val status = when {
                 db?.status == SessionStatus.COMPLETED -> SessionStatus.COMPLETED
-                db?.status == SessionStatus.AT_GYM -> SessionStatus.AT_GYM
+                db?.status == SessionStatus.AT_GYM    -> SessionStatus.AT_GYM
                 event.endTime < now && db?.status != SessionStatus.COMPLETED -> SessionStatus.MISSED
                 else -> SessionStatus.UPCOMING
             }
             event.copy(sessionStatus = status)
-        }
-    }
-
-    fun scheduleWakeupAlarm(account: Account, wakeupTimeMillis: Long, label: String, leadTimeMinutes: Int = 30) {
-        viewModelScope.launch {
-            val today = LocalDate.now(ZoneId.systemDefault())
-            alarmRepository.scheduleWakeupAlarm(
-                date = today,
-                wakeupTimeMillis = wakeupTimeMillis,
-                label = label,
-                leadTimeMinutes = leadTimeMinutes
-            )
-            // Refresh to show updated alarm
-            loadTodayData(account, ((_uiState.value as? HomeUiState.Success)?.userName ?: ""), leadTimeMinutes)
         }
     }
 }

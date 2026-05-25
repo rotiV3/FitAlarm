@@ -24,6 +24,8 @@ import com.rotiv3.fitalarm.databinding.FragmentEventDetailBinding
 import com.rotiv3.fitalarm.location.OutdoorTrackingService
 import com.rotiv3.fitalarm.ui.outdoor.OutdoorSessionDetailActivity
 import com.rotiv3.fitalarm.ui.outdoor.OutdoorTrackingActivity
+import com.rotiv3.fitalarm.billing.SubscriptionManager
+import com.rotiv3.fitalarm.ui.paywall.PaywallFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -36,6 +38,7 @@ class EventDetailFragment : Fragment(), OnMapReadyCallback {
 
     @Inject lateinit var gymSessionDao: GymSessionDao
     @Inject lateinit var outdoorSessionDao: OutdoorSessionDao
+    @Inject lateinit var subscriptionManager: SubscriptionManager
 
     private var _binding: FragmentEventDetailBinding? = null
     private val binding get() = _binding!!
@@ -130,12 +133,22 @@ class EventDetailFragment : Fragment(), OnMapReadyCallback {
             binding.ivLocationIcon.visibility = View.GONE
         }
 
-        val showTrainingPlan = activityType == ActivityType.GYM && !trainingPlan.isNullOrBlank()
-        if (showTrainingPlan) {
-            binding.cardTrainingPlan.visibility = View.VISIBLE
-            binding.tvTrainingPlan.text = trainingPlan
-        } else {
-            binding.cardTrainingPlan.visibility = View.GONE
+        val hasTrainingPlan = activityType == ActivityType.GYM && !trainingPlan.isNullOrBlank()
+        when {
+            !hasTrainingPlan -> binding.cardTrainingPlan.visibility = View.GONE
+            subscriptionManager.isPro -> {
+                binding.cardTrainingPlan.visibility = View.VISIBLE
+                binding.tvTrainingPlan.text = trainingPlan
+            }
+            else -> {
+                // Free user — show teaser + upgrade prompt
+                binding.cardTrainingPlan.visibility = View.VISIBLE
+                binding.tvTrainingPlan.text = "🔒 Training plan available in Pro\n\nUpgrade to see full workout details, sets, reps and coaching notes."
+                binding.cardTrainingPlan.setOnClickListener {
+                    PaywallFragment.newInstance("Full training plans")
+                        .show(parentFragmentManager, "paywall")
+                }
+            }
         }
     }
 

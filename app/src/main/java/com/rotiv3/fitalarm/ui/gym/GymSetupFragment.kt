@@ -24,6 +24,7 @@ import com.rotiv3.fitalarm.R
 import com.rotiv3.fitalarm.data.model.GymLocation
 import com.rotiv3.fitalarm.databinding.FragmentGymSetupBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.rotiv3.fitalarm.ui.paywall.PaywallFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,7 +73,14 @@ class GymSetupFragment : Fragment(), OnMapReadyCallback {
         gymListAdapter = GymLocationAdapter(
             onDelete = { gym -> viewModel.deleteGymLocation(gym) },
             onToggle = { gym -> viewModel.toggleGymActive(gym.id, !gym.isActive) },
-            onRename = { gym, newName -> viewModel.updateGymLocation(gym.copy(name = newName)) }
+            onRename = { gym, newName ->
+                if (!viewModel.subscriptionManager.isPro) {
+                    PaywallFragment.newInstance("Renaming gym locations")
+                        .show(parentFragmentManager, "paywall")
+                } else {
+                    viewModel.updateGymLocation(gym.copy(name = newName))
+                }
+            }
         )
         binding.rvSavedGyms.adapter = gymListAdapter
         binding.rvSavedGyms.layoutManager = LinearLayoutManager(requireContext())
@@ -97,8 +105,11 @@ class GymSetupFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupSaveButton() {
         binding.btnSaveGym.setOnClickListener {
-            if (viewModel.gymLocations.value.size >= MAX_GYM_LOCATIONS) {
-                Toast.makeText(requireContext(), "Maximum 3 gym locations allowed", Toast.LENGTH_SHORT).show()
+            val currentCount = viewModel.gymLocations.value.size
+            if (!viewModel.canAddGym(currentCount)) {
+                // Free users: show paywall when trying to add a 2nd gym
+                PaywallFragment.newInstance("Multiple gym locations")
+                    .show(parentFragmentManager, "paywall")
                 return@setOnClickListener
             }
             val latLng = selectedLatLng
@@ -237,7 +248,7 @@ class GymSetupFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun updateAddGymVisibility(count: Int) {
-        val limitReached = count >= MAX_GYM_LOCATIONS
+        val limitReached = !viewModel.canAddGym(count)
         binding.addGymControls.visibility = if (limitReached) View.GONE else View.VISIBLE
         binding.tvGymLimit.visibility = if (limitReached) View.VISIBLE else View.GONE
 

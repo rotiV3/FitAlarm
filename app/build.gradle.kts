@@ -136,6 +136,9 @@ dependencies {
     // DataStore
     implementation(libs.datastore.preferences)
 
+    // Google Play Billing (subscriptions / Pro upgrade)
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

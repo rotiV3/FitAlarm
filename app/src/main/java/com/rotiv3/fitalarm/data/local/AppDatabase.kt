@@ -8,6 +8,8 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import com.rotiv3.fitalarm.data.model.Achievement
 import com.rotiv3.fitalarm.data.model.AchievementType
+import com.rotiv3.fitalarm.data.model.ActivityType
+import com.rotiv3.fitalarm.data.model.AppEvent
 import com.rotiv3.fitalarm.data.model.GymLocation
 import com.rotiv3.fitalarm.data.model.GymSession
 import com.rotiv3.fitalarm.data.model.OutdoorAchievement
@@ -30,6 +32,12 @@ class Converters {
 
     @TypeConverter
     fun toSessionStatus(value: String): SessionStatus = SessionStatus.valueOf(value)
+
+    @TypeConverter
+    fun fromActivityType(value: ActivityType): String = value.name
+
+    @TypeConverter
+    fun toActivityType(value: String): ActivityType = ActivityType.valueOf(value)
 
     @TypeConverter
     fun routeToJson(points: List<RoutePoint>): String {
@@ -62,9 +70,10 @@ class Converters {
         WakeupAlarm::class,
         GymSession::class,
         OutdoorSession::class,
-        OutdoorAchievement::class
+        OutdoorAchievement::class,
+        AppEvent::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -76,6 +85,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun gymSessionDao(): GymSessionDao
     abstract fun outdoorSessionDao(): OutdoorSessionDao
     abstract fun outdoorAchievementDao(): OutdoorAchievementDao
+    abstract fun appEventDao(): AppEventDao
 
     companion object {
         private const val DATABASE_NAME = "fitalarm_database"

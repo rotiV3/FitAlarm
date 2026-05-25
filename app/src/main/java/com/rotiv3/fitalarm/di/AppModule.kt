@@ -1,8 +1,10 @@
 package com.rotiv3.fitalarm.di
 
 import android.content.Context
+import com.rotiv3.fitalarm.billing.SubscriptionManager
 import com.rotiv3.fitalarm.data.local.AppDatabase
 import com.rotiv3.fitalarm.data.local.AchievementDao
+import com.rotiv3.fitalarm.data.local.AppEventDao
 import com.rotiv3.fitalarm.data.local.GymLocationDao
 import com.rotiv3.fitalarm.data.local.GymSessionDao
 import com.rotiv3.fitalarm.data.local.OutdoorAchievementDao
@@ -47,4 +49,13 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOutdoorAchievementDao(db: AppDatabase): OutdoorAchievementDao = db.outdoorAchievementDao()
+
+    @Provides
+    @Singleton
+    fun provideAppEventDao(db: AppDatabase): AppEventDao = db.appEventDao()
+
+    @Provides
+    @Singleton
+    fun provideSubscriptionManager(@ApplicationContext context: Context): SubscriptionManager =
+        SubscriptionManager(context)
 }

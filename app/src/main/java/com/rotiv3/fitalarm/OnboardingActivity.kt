@@ -71,6 +71,11 @@ class OnboardingActivity : AppCompatActivity() {
             val signInIntent = googleSignInClient.signInIntent
             signInLauncher.launch(signInIntent)
         }
+
+        // Allow users to skip sign-in and use the app as a guest
+        binding.btnContinueAsGuest?.setOnClickListener {
+            navigateToMain()
+        }
     }
 
     private fun handleSignInSuccess(account: GoogleSignInAccount) {
