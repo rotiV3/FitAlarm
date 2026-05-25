@@ -105,7 +105,7 @@
 
         </LinearLayout>
 
-        <!-- Shown when 3 gyms are saved -->
+        <!-- Shown when gym limit is reached (text set dynamically by GymSetupFragment) -->
         <TextView
             android:id="@+id/tvGymLimit"
             android:layout_width="match_parent"
@@ -113,7 +113,7 @@
             android:layout_marginBottom="8dp"
             android:gravity="center"
             android:padding="12dp"
-            android:text="Maximum of 3 gym locations saved.\nDelete one to add another."
+            android:text="Free plan: 1 gym location.\nUpgrade to Pro for up to 3 locations."
             android:textColor="#AAAAAA"
             android:textSize="14sp"
             android:visibility="gone" />

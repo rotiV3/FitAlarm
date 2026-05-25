@@ -1,148 +1,268 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="0dp"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@color/surface"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tabGravity="fill"
-        app:tabIndicatorColor="@color/gym_green"
-        app:tabMode="fixed"
-        app:tabSelectedTextColor="@color/gym_green"
-        app:tabTextColor="#AAAAAA" />
+        android:background="@color/surface">
 
-    <LinearLayout
-        android:id="@+id/navBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPrevious"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="wrap_content"
-            android:layout_height="58dp"
-            android:text="&lt;"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvCurrentDate"
-            android:layout_width="0dp"
+        <!-- Day / Month tabs -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+            android:background="@color/surface"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@color/gym_green"
+            app:tabMode="fixed"
+            app:tabSelectedTextColor="@color/gym_green"
+            app:tabTextColor="#AAAAAA" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnToday"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="wrap_content"
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/today" />
+            android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNext"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=">"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            <!-- ── Guest: sync prompt card ───────────────────────────────── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSyncPrompt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#1A2A3A"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSync"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#1b5e20"
-            android:contentDescription="Sync calendar"
-            android:textColor="#FAECEC"
-            android:textColorLink="#FFFFFF"
-            android:textStyle="bold"
-            app:icon="@drawable/ic_sync" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-    </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🔗 Connect your calendar"
+                        android:textColor="@android:color/white"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp" />
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupFilter"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/navBar"
-        app:selectionRequired="true"
-        app:singleSelection="true">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Sign in to sync your Google or Apple Calendar events and see them here."
+                        android:textColor="#AAAAAA"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="12dp" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipAll"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="All events" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipWorkouts"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Workouts only" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSyncGoogle"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:text="Google"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_sync"
+                            app:backgroundTint="#4285F4"
+                            app:cornerRadius="8dp" />
 
-    </com.google.android.material.chip.ChipGroup>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSyncApple"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:text="Apple"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_alarm"
+                            app:backgroundTint="#000000"
+                            app:cornerRadius="8dp" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chipGroupFilter" />
+                    </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_events"
-        android:textColor="#888888"
-        android:textSize="16sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chipGroupFilter" />
+                </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvEvents"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:padding="8dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chipGroupFilter" />
+            </com.google.android.material.card.MaterialCardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- ── Month calendar grid ──────────────────────────────────── -->
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:dateTextAppearance="@android:style/TextAppearance.Small"
+                android:firstDayOfWeek="2"
+                android:focusedMonthDateColor="#4CAF50"
+                android:selectedDateVerticalBar="@color/gym_green"
+                android:selectedWeekBackgroundColor="#1A4CAF50"
+                android:showWeekNumber="false"
+                android:unfocusedMonthDateColor="#555555"
+                android:weekDayTextAppearance="@android:style/TextAppearance.Small"
+                android:weekSeparatorLineColor="#222222" />
+
+            <!-- ── Selected day header + filter ────────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:id="@+id/tvCurrentDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnToday"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/today"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSync"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="Sync calendar"
+                    app:icon="@drawable/ic_sync" />
+
+            </LinearLayout>
+
+            <!-- Filter chips -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupFilter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="12dp"
+                android:paddingBottom="4dp"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAll"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="All events" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipWorkouts"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Workouts only" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <!-- ── Events for selected day ──────────────────────────────── -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="@string/no_events"
+                android:textColor="#888888"
+                android:textSize="15sp"
+                android:visibility="gone" />
+
+            <!-- ── Guest: Pro teaser card ──────────────────────────────── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardProTeaser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#1A1A2E"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="⚡ Unlock with FitAlarm Pro"
+                        android:textColor="#FFD700"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="• Sync unlimited events from any calendar\n• Full training plans &amp; activity details\n• Share your activities &amp; route maps"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="12dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUpgradePro"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="Upgrade to Pro ⚡"
+                        android:textColor="#000000"
+                        app:backgroundTint="#FFD700"
+                        app:cornerRadius="22dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvEvents"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingHorizontal="8dp"
+                android:paddingBottom="80dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

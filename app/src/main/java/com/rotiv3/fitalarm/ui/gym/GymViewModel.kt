@@ -25,9 +25,15 @@ class GymViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    /** Free users may only have 1 gym; Pro users are unlimited (practical cap: 10). */
+    /** Free users may only have 1 gym; Pro users get up to 3 locations. */
     fun canAddGym(currentCount: Int): Boolean =
-        if (subscriptionManager.isPro) currentCount < 10 else currentCount < 1
+        if (subscriptionManager.isPro) currentCount < 3 else currentCount < 1
+
+    val gymLimitMessage: String
+        get() = if (subscriptionManager.isPro)
+            "Maximum of 3 gym locations saved.\nDelete one to add another."
+        else
+            "Free plan: 1 gym location.\nUpgrade to Pro for up to 3 locations."
 
     fun addGymLocation(
         name: String,

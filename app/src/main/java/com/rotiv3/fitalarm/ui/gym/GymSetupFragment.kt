@@ -250,7 +250,17 @@ class GymSetupFragment : Fragment(), OnMapReadyCallback {
     private fun updateAddGymVisibility(count: Int) {
         val limitReached = !viewModel.canAddGym(count)
         binding.addGymControls.visibility = if (limitReached) View.GONE else View.VISIBLE
-        binding.tvGymLimit.visibility = if (limitReached) View.VISIBLE else View.GONE
+        if (limitReached) {
+            binding.tvGymLimit.text = viewModel.gymLimitMessage
+            binding.tvGymLimit.visibility = View.VISIBLE
+            // Show paywall shortcut when free user hits limit
+            if (!viewModel.subscriptionManager.isPro) {
+                PaywallFragment.newInstance("Multiple gym locations")
+                    .show(parentFragmentManager, "paywall")
+            }
+        } else {
+            binding.tvGymLimit.visibility = View.GONE
+        }
 
         // Hide the map entirely when max gyms reached so the bottom sheet fills the screen
         val mapView = requireView().findViewById<View>(R.id.mapFragmentGym)

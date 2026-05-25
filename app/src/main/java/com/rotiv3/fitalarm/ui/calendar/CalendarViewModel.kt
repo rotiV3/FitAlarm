@@ -5,7 +5,9 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
+import com.rotiv3.fitalarm.data.local.AppEventDao
 import com.rotiv3.fitalarm.data.local.OutdoorSessionDao
+import com.rotiv3.fitalarm.data.model.CalendarEvent
 import com.rotiv3.fitalarm.data.model.SessionStatus
 import com.rotiv3.fitalarm.data.repository.CalendarRepository
 import com.rotiv3.fitalarm.data.repository.GymRepository
@@ -17,22 +19,21 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     private val calendarRepository: CalendarRepository,
     private val gymRepository: GymRepository,
-    private val outdoorSessionDao: OutdoorSessionDao
+    private val outdoorSessionDao: OutdoorSessionDao,
+    private val appEventDao: AppEventDao
 ) : ViewModel() {
 
     val achievedEventIds: StateFlow<Set<String>> = outdoorSessionDao.getAllSessionsFlow()
@@ -48,73 +49,106 @@ class CalendarViewModel @Inject constructor(
     private val _authEvent = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
     val authEvent: SharedFlow<Intent> = _authEvent.asSharedFlow()
 
-    private var currentViewMode = ViewMode.DAY
+    /** True when the user is signed in with Google (or Apple later). */
     private var currentAccount: Account? = null
+    val isSignedIn: Boolean get() = currentAccount != null
+
     private var currentDate: LocalDate = LocalDate.now(ZoneId.systemDefault())
     private var showOnlyWorkouts = false
 
     fun setShowOnlyWorkouts(enabled: Boolean) {
         showOnlyWorkouts = enabled
-        loadEvents()
+        loadEventsForDate(currentDate)
     }
 
     fun setAccount(account: Account) {
         currentAccount = account
-        updateDateLabel()
-        loadEvents()
+        loadEventsForDate(currentDate)
     }
 
-    fun setViewMode(viewMode: ViewMode) {
-        currentViewMode = viewMode
+    /** Called when user taps a day on the CalendarView. */
+    fun selectDate(date: LocalDate) {
+        currentDate = date
         updateDateLabel()
-        loadEvents()
-    }
-
-    fun navigatePrevious() {
-        currentDate = when (currentViewMode) {
-            ViewMode.DAY -> currentDate.minusDays(1)
-            ViewMode.WEEK -> currentDate.minusWeeks(1)
-            ViewMode.MONTH -> currentDate.minusMonths(1)
-        }
-        updateDateLabel()
-        loadEvents()
-    }
-
-    fun navigateNext() {
-        currentDate = when (currentViewMode) {
-            ViewMode.DAY -> currentDate.plusDays(1)
-            ViewMode.WEEK -> currentDate.plusWeeks(1)
-            ViewMode.MONTH -> currentDate.plusMonths(1)
-        }
-        updateDateLabel()
-        loadEvents()
+        loadEventsForDate(date)
     }
 
     fun goToToday() {
         currentDate = LocalDate.now(ZoneId.systemDefault())
         updateDateLabel()
-        loadEvents()
+        loadEventsForDate(currentDate)
     }
 
     fun refresh() {
-        loadEvents()
+        loadEventsForDate(currentDate)
+    }
+
+    fun initialLoad() {
+        updateDateLabel()
+        loadEventsForDate(currentDate)
+    }
+
+    private fun updateDateLabel() {
+        val fmt = DateTimeFormatter.ofPattern("EEEE, MMMM d")
+        _dateLabel.value = currentDate.format(fmt)
+    }
+
+    private fun loadEventsForDate(date: LocalDate) {
+        _uiState.value = CalendarUiState.Loading
+
+        viewModelScope.launch {
+            try {
+                val zone = ZoneId.systemDefault()
+                val dayStart = date.atStartOfDay(zone).toEpochSecond() * 1000L
+                val dayEnd   = date.plusDays(1).atStartOfDay(zone).toEpochSecond() * 1000L
+
+                // Always load local app events
+                val localEvents: List<CalendarEvent> = appEventDao
+                    .getEventsForDay(dayStart, dayEnd)
+                    .first()
+                    .map { it.toCalendarEvent() }
+
+                // Google Calendar events — only when signed in
+                val remoteEvents: List<CalendarEvent> = if (currentAccount != null) {
+                    try {
+                        calendarRepository.getEventsForDay(currentAccount!!, date)
+                    } catch (e: UserRecoverableAuthIOException) {
+                        _authEvent.tryEmit(e.intent)
+                        emptyList()
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                } else emptyList()
+
+                val merged = (localEvents + remoteEvents).sortedBy { it.startTime }
+                val withStatus = attachSessionStatus(merged)
+                val filtered = if (showOnlyWorkouts) withStatus.filter { it.isGymEvent } else withStatus
+
+                _uiState.value = CalendarUiState.Success(
+                    events = filtered,
+                    isSignedIn = currentAccount != null
+                )
+            } catch (e: Exception) {
+                _uiState.value = CalendarUiState.Error("Failed to load events: ${e.message}")
+            }
+        }
     }
 
     private suspend fun attachSessionStatus(
-        events: List<com.rotiv3.fitalarm.data.model.CalendarEvent>
-    ): List<com.rotiv3.fitalarm.data.model.CalendarEvent> {
+        events: List<CalendarEvent>
+    ): List<CalendarEvent> {
+        if (events.isEmpty()) return events
         val now = System.currentTimeMillis()
-        val rangeStart = events.minOfOrNull { it.startTime } ?: return events
-        val rangeEnd = events.maxOfOrNull { it.endTime } ?: return events
-        val sessions = gymRepository.getSessionsForDay(rangeStart, rangeEnd)
-            .associateBy { it.eventId }
+        val rangeStart = events.minOf { it.startTime }
+        val rangeEnd = events.maxOf { it.endTime }
+        val sessions = gymRepository.getSessionsForDay(rangeStart, rangeEnd).associateBy { it.eventId }
 
         return events.map { event ->
             if (!event.isGymEvent) return@map event
             val db = sessions[event.id]
             val status = when {
                 db?.status == SessionStatus.COMPLETED -> SessionStatus.COMPLETED
-                db?.status == SessionStatus.AT_GYM -> SessionStatus.AT_GYM
+                db?.status == SessionStatus.AT_GYM    -> SessionStatus.AT_GYM
                 event.endTime < now && db?.status != SessionStatus.COMPLETED -> SessionStatus.MISSED
                 else -> SessionStatus.UPCOMING
             }
@@ -122,47 +156,6 @@ class CalendarViewModel @Inject constructor(
         }
     }
 
-    private fun updateDateLabel() {
-        val fmt = DateTimeFormatter.ofPattern("MMM d")
-        val fmtFull = DateTimeFormatter.ofPattern("MMMM d, yyyy")
-        val fmtMonth = DateTimeFormatter.ofPattern("MMMM yyyy")
-        _dateLabel.value = when (currentViewMode) {
-            ViewMode.DAY -> currentDate.format(fmtFull)
-            ViewMode.WEEK -> {
-                val monday = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                val sunday = monday.plusDays(6)
-                "${monday.format(fmt)} – ${sunday.format(fmt)}"
-            }
-            ViewMode.MONTH -> currentDate.format(fmtMonth)
-        }
-    }
-
-    private fun loadEvents() {
-        val account = currentAccount ?: return
-        _uiState.value = CalendarUiState.Loading
-
-        viewModelScope.launch {
-            try {
-                val events = when (currentViewMode) {
-                    ViewMode.DAY -> calendarRepository.getEventsForDay(account, currentDate)
-                    ViewMode.WEEK -> {
-                        val monday = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                        calendarRepository.getEventsForWeek(account, monday)
-                    }
-                    ViewMode.MONTH -> calendarRepository.getEventsForMonth(
-                        account,
-                        YearMonth.from(currentDate)
-                    )
-                }
-                val eventsWithStatus = attachSessionStatus(events)
-                val filtered = if (showOnlyWorkouts) eventsWithStatus.filter { it.isGymEvent } else eventsWithStatus
-                _uiState.value = CalendarUiState.Success(filtered, currentViewMode)
-            } catch (e: UserRecoverableAuthIOException) {
-                _authEvent.tryEmit(e.intent)
-                _uiState.value = CalendarUiState.Error("Calendar permission needed. Tap sync after granting access.")
-            } catch (e: Exception) {
-                _uiState.value = CalendarUiState.Error("Failed to load calendar: ${e.message}")
-            }
-        }
-    }
+    // Kept for back-compat (CalendarFragment still calls setViewMode-style tabs)
+    fun setViewMode(viewMode: ViewMode) { /* Day tab = default; month tab collapses the CalendarView */ }
 }

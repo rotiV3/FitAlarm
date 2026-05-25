@@ -65,9 +65,17 @@ class CreateEventFragment : Fragment() {
         setupSaveButton()
         observeSaveResult()
 
-        // Pre-fill date with today
+        // Pre-fill with sensible defaults so Save works without forcing pickers
         selectedDateMillis = stripTimeFromMillis(System.currentTimeMillis())
         binding.etDate.setText(dateFormat.format(Date(selectedDateMillis)))
+
+        val nowCal = Calendar.getInstance()
+        startHour = nowCal.get(Calendar.HOUR_OF_DAY) + 1
+        startMinute = 0
+        endHour = startHour + 1
+        endMinute = 0
+        binding.etStartTime.setText(formatTime(startHour, startMinute))
+        binding.etEndTime.setText(formatTime(endHour, endMinute))
     }
 
     // ─── Date picker ────────────────────────────────────────────────────────

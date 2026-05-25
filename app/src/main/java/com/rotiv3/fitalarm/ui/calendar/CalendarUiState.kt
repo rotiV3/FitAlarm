@@ -7,7 +7,7 @@ sealed class CalendarUiState {
 
     data class Success(
         val events: List<CalendarEvent>,
-        val viewMode: ViewMode = ViewMode.DAY
+        val isSignedIn: Boolean = false
     ) : CalendarUiState()
 
     data class Error(val message: String) : CalendarUiState()
