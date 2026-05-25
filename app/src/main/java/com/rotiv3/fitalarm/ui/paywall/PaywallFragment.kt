@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.rotiv3.fitalarm.R
@@ -51,9 +50,10 @@ class PaywallFragment : BottomSheetDialogFragment() {
         binding.tvLockedFeature.text = "$feature is a Pro feature"
 
         // Populate feature rows dynamically
+        // binding.featN is ItemPaywallFeatureBinding (ViewBinding for the <include>) — access fields directly
         val rows = listOf(binding.feat1, binding.feat2, binding.feat3, binding.feat4, binding.feat5)
         rows.forEachIndexed { i, row ->
-            row.findViewById<TextView>(R.id.tvFeatureText).text = PRO_FEATURES.getOrElse(i) { "" }
+            row.tvFeatureText.text = PRO_FEATURES.getOrElse(i) { "" }
         }
 
         binding.btnUpgrade.setOnClickListener {
