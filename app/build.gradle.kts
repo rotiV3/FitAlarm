@@ -1,3 +1,4 @@
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -13,6 +14,14 @@ if (localPropertiesFile.exists()) {
     localProperties.load(localPropertiesFile.inputStream())
 }
 
+// ── Signing helpers ──────────────────────────────────────────────────────────
+// Priority: CI environment variables → local.properties → unsigned (debug only)
+
+fun envOrLocal(envKey: String, localKey: String = envKey): String =
+    System.getenv(envKey) ?: localProperties.getProperty(localKey, "")
+
+val keystoreFile = rootProject.file("release.keystore")
+
 android {
     namespace = "com.rotiv3.fitalarm"
     compileSdk = 35
@@ -21,23 +30,41 @@ android {
         applicationId = "com.rotiv3.fitalarm"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = (System.getenv("VERSION_CODE") ?: localProperties.getProperty("VERSION_CODE", "1")).toInt()
+        versionName = System.getenv("VERSION_NAME") ?: localProperties.getProperty("VERSION_NAME", "1.0")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val mapsApiKey = localProperties.getProperty("MAPS_API_KEY", "")
+        val mapsApiKey = envOrLocal("MAPS_API_KEY")
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
         buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
 
-        // Web client ID for OAuth2 (Google Sign-In)
-        val webClientId = localProperties.getProperty("WEB_CLIENT_ID", "")
+        val webClientId = envOrLocal("WEB_CLIENT_ID")
         buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
+    }
+
+    // ── Decode keystore from Base64 env var in CI ────────────────────────────
+    val keystoreBase64 = System.getenv("KEYSTORE_BASE64")
+    if (keystoreBase64 != null && keystoreBase64.isNotEmpty()) {
+        val decoded = Base64.getDecoder().decode(keystoreBase64)
+        keystoreFile.writeBytes(decoded)
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystoreFile.exists()) {
+                storeFile     = keystoreFile
+                storePassword = envOrLocal("KEYSTORE_PASSWORD")
+                keyAlias      = envOrLocal("KEY_ALIAS")
+                keyPassword   = envOrLocal("KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            signingConfig = if (keystoreFile.exists()) signingConfigs.getByName("release") else null
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
