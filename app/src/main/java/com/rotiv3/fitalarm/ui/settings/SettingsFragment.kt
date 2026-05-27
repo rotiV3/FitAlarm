@@ -12,6 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
@@ -65,6 +67,14 @@ class SettingsFragment : Fragment() {
 
         binding.btnBackgroundLocationInfo.setOnClickListener {
             openAppSettings()
+        }
+
+        binding.btnPrivacyPolicy.setOnClickListener {
+            openUrl("https://rotiv3.github.io/FitAlarm/privacy-policy")
+        }
+
+        binding.btnDeleteAccount.setOnClickListener {
+            showDeleteAccountDialog()
         }
     }
 
@@ -125,6 +135,40 @@ class SettingsFragment : Fragment() {
             data = Uri.parse("package:${requireContext().packageName}")
         }
         startActivity(intent)
+    }
+
+    private fun openUrl(url: String) {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    }
+
+    private fun showDeleteAccountDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Delete Account & Data")
+            .setMessage(
+                "This will permanently delete:\n\n" +
+                "• All gym and outdoor session history\n" +
+                "• Planned activities\n" +
+                "• Achievements\n" +
+                "• Saved gym locations\n\n" +
+                "This cannot be undone. Continue?"
+            )
+            .setPositiveButton("Delete Everything") { _, _ -> deleteAllDataAndSignOut() }
+            .setNegativeButton("Cancel", null)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .show()
+    }
+
+    private fun deleteAllDataAndSignOut() {
+        // Clear all local Room data by deleting the database, then sign out
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                requireContext().deleteDatabase("fitalarm_database")
+                signOut()
+            } catch (e: Exception) {
+                // Fallback: open web deletion form
+                openUrl("https://rotiv3.github.io/FitAlarm/data-deletion")
+            }
+        }
     }
 
     override fun onDestroyView() {
