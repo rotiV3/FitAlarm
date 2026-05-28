@@ -91,7 +91,7 @@ jobs:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName:        com.rotiv3.fitalarm
           releaseFiles:       app/build/outputs/bundle/release/app-release.aab
-          track:              internal
+          tracks:              internal
           status:             completed
           whatsNewDirectory:  distribution/whatsnew
 
@@ -103,6 +103,6 @@ jobs:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName:        com.rotiv3.fitalarm
           releaseFiles:       app/build/outputs/bundle/release/app-release.aab
-          track:              production
+          tracks:              production
           status:             completed
           whatsNewDirectory:  distribution/whatsnew
