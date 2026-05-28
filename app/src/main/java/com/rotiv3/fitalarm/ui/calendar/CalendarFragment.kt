@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.calendar.CalendarScopes
 import com.google.android.material.tabs.TabLayout
+import com.rotiv3.fitalarm.BuildConfig
 import com.rotiv3.fitalarm.R
 import com.rotiv3.fitalarm.databinding.FragmentCalendarBinding
 import com.rotiv3.fitalarm.ui.paywall.PaywallFragment
