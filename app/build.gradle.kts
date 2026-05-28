@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    id("com.google.gms.google-services")
 }
 
 val localProperties = Properties()
@@ -30,7 +31,7 @@ android {
         applicationId = "com.rotiv3.fitalarm"
         minSdk = 26
         targetSdk = 35
-        versionCode = (System.getenv("VERSION_CODE") ?: localProperties.getProperty("VERSION_CODE", "1")).toInt()
+        versionCode = (System.getenv("VERSION_CODE") ?: localProperties.getProperty("VERSION_CODE", "2")).toInt()
         versionName = System.getenv("VERSION_NAME") ?: localProperties.getProperty("VERSION_NAME", "1.0")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -145,6 +146,9 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+
+    implementation(platform("com.google.firebase:firebase-bom:34.13.0"))
+    implementation("com.google.firebase:firebase-analytics")
 
     // Google Calendar API
     implementation(libs.google.api.services.calendar)

@@ -17,6 +17,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
+import com.rotiv3.fitalarm.BuildConfig
 import com.rotiv3.fitalarm.R
 import com.rotiv3.fitalarm.databinding.FragmentHomeBinding
 import com.rotiv3.fitalarm.ui.calendar.CalendarEventAdapter
@@ -181,7 +183,9 @@ class HomeFragment : Fragment() {
 
     private fun launchGoogleSignIn() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(BuildConfig.WEB_CLIENT_ID)   // required for Calendar API auth
             .requestEmail()
+            .requestScopes(Scope(com.google.api.services.calendar.CalendarScopes.CALENDAR_READONLY))
             .build()
         val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(requireActivity(), gso)
         signInLauncher.launch(client.signInIntent)

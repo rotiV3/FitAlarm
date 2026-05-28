@@ -57,6 +57,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun setupGoogleSignIn() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(BuildConfig.WEB_CLIENT_ID)   // required for server-side auth & Calendar API
             .requestEmail()
             .requestProfile()
             .requestScopes(Scope(CalendarScopes.CALENDAR_READONLY))

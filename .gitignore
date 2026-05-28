@@ -1,5 +1,6 @@
 # ─── Local secrets — NEVER commit ──────────────────────────────────────────────
 local.properties
+google-services.json
 
 # ─── Android build outputs ─────────────────────────────────────────────────────
 *.apk

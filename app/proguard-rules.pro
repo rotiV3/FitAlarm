@@ -1,5 +1,12 @@
 # Add project specific ProGuard rules here.
 
+# Google Play Services — auth, sign-in, common (must NOT be stripped in release builds)
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+-keep class com.google.android.gms.signin.** { *; }
+-keep class com.google.android.gms.tasks.** { *; }
+-dontwarn com.google.android.gms.**
+
 # Google API Client
 -keep class com.google.api.** { *; }
 -keep class com.google.apis.** { *; }

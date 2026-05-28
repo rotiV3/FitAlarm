@@ -32,5 +32,5 @@
     <color name="badge_gym_bg">#1A4CAF50</color>
 
     <!-- ic_launcher background -->
-    <color name="ic_launcher_background">#1B5E20</color>
+    <color name="ic_launcher_background">#0A0A0A</color>
 </resources>
